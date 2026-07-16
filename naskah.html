@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Naskah — ruang tulis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3ECDA;
+    --paper-dim:#EDE4CD;
+    --paper-line:#DED2B2;
+    --ink:#26261F;
+    --ink-soft:#6B6A5C;
+    --spine:#262922;
+    --spine-2:#2F332A;
+    --spine-text:#E9E4D4;
+    --spine-text-dim:#9C9C8C;
+    --accent:#5C7A5E;
+    --accent-bright:#82A183;
+    --rust:#B0512E;
+    --rust-soft:#D89C82;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--spine);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    overflow:hidden;
+  }
+  .app{
+    display:flex;
+    height:100vh;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar{
+    width:290px;
+    flex-shrink:0;
+    background:var(--spine);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .sidebar::after{
+    content:'';
+    position:absolute;
+    top:0; right:0; bottom:0;
+    width:14px;
+    background:linear-gradient(to right, rgba(0,0,0,0.35), rgba(0,0,0,0));
+    pointer-events:none;
+  }
+  .brand{
+    padding:26px 22px 18px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .brand svg{ flex-shrink:0; }
+  .brand-text h1{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:21px;
+    color:var(--spine-text);
+    margin:0;
+    letter-spacing:0.2px;
+  }
+  .brand-text p{
+    margin:2px 0 0;
+    font-size:11.5px;
+    color:var(--spine-text-dim);
+    letter-spacing:0.3px;
+  }
+  .new-btn{
+    margin:4px 18px 14px;
+    padding:10px 14px;
+    background:transparent;
+    border:1px solid #454940;
+    color:var(--spine-text);
+    border-radius:8px;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    transition:background 0.15s, border-color 0.15s;
+  }
+  .new-btn:hover{ background:var(--spine-2); border-color:var(--accent); }
+  .new-btn svg{ opacity:0.85; }
+
+  .note-list{
+    flex:1;
+    overflow-y:auto;
+    padding:4px 10px 20px;
+  }
+  .note-list::-webkit-scrollbar{ width:8px; }
+  .note-list::-webkit-scrollbar-thumb{ background:#3a3d34; border-radius:4px; }
+
+  .note-item{
+    padding:11px 12px;
+    border-radius:7px;
+    cursor:pointer;
+    margin-bottom:2px;
+    position:relative;
+    border-left:2px solid transparent;
+  }
+  .note-item:hover{ background:var(--spine-2); }
+  .note-item.active{
+    background:var(--spine-2);
+    border-left:2px solid var(--accent-bright);
+  }
+  .note-item-title{
+    font-family:'Fraunces',serif;
+    font-size:15px;
+    color:var(--spine-text);
+    margin:0 0 4px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .note-item.empty .note-item-title{ color:var(--spine-text-dim); font-style:italic; }
+  .note-item-meta{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    font-size:11.5px;
+    color:var(--spine-text-dim);
+  }
+  .note-item-snippet{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    flex:1;
+  }
+  .empty-state{
+    padding:30px 20px;
+    text-align:center;
+    color:var(--spine-text-dim);
+    font-size:13px;
+    line-height:1.6;
+  }
+
+  /* ===== MAIN / PAPER ===== */
+  .paper{
+    flex:1;
+    background:var(--paper);
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+    position:relative;
+  }
+  .toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 40px 0;
+    flex-shrink:0;
+  }
+  .toolbar-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .save-dot{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--accent);
+    display:inline-block;
+    transition:opacity 0.3s;
+  }
+  .save-dot.idle{ opacity:0.25; }
+  .icon-btn{
+    background:transparent;
+    border:none;
+    color:var(--ink-soft);
+    cursor:pointer;
+    padding:6px;
+    border-radius:6px;
+    display:flex;
+    align-items:center;
+    transition:background 0.15s, color 0.15s;
+  }
+  .icon-btn:hover{ background:var(--paper-line); color:var(--rust); }
+  .menu-toggle{ display:none; }
+
+  .editor{
+    flex:1;
+    overflow-y:auto;
+    padding:10px 40px 60px;
+  }
+  .editor::-webkit-scrollbar{ width:9px; }
+  .editor::-webkit-scrollbar-thumb{ background:var(--paper-line); border-radius:5px; }
+
+  .title-input{
+    width:100%;
+    border:none;
+    background:transparent;
+    outline:none;
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:34px;
+    color:var(--ink);
+    padding:14px 0 6px;
+    line-height:1.25;
+  }
+  .title-input::placeholder{ color:var(--ink-soft); opacity:0.55; }
+
+  .body-input{
+    width:100%;
+    min-height:60vh;
+    border:none;
+    background:transparent;
+    outline:none;
+    resize:none;
+    font-family:'JetBrains Mono',monospace;
+    font-size:15px;
+    line-height:2;
+    color:var(--ink);
+    padding-top:10px;
+  }
+  .body-input::placeholder{ color:var(--ink-soft); opacity:0.55; font-style:italic; font-family:'Fraunces',serif;}
+
+  .statusbar{
+    padding:8px 40px 16px;
+    display:flex;
+    justify-content:flex-end;
+    gap:16px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    flex-shrink:0;
+    letter-spacing:0.2px;
+  }
+
+  .welcome{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    color:var(--ink-soft);
+    text-align:center;
+    padding:40px;
+  }
+  .welcome svg{ opacity:0.5; margin-bottom:14px; }
+  .welcome h2{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-style:italic;
+    font-size:24px;
+    color:var(--ink);
+    margin:0 0 8px;
+  }
+  .welcome p{ margin:0 0 20px; font-size:13.5px; max-width:300px; }
+  .welcome button{
+    padding:10px 20px;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    border-radius:8px;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    cursor:pointer;
+  }
+
+  @media (max-width: 760px){
+    .sidebar{
+      position:fixed;
+      z-index:20;
+      height:100%;
+      transform:translateX(-100%);
+      transition:transform 0.2s ease;
+      box-shadow:8px 0 24px rgba(0,0,0,0.3);
+    }
+    .sidebar.open{ transform:translateX(0); }
+    .menu-toggle{
+      display:flex;
+    }
+    .editor, .toolbar, .statusbar{ padding-left:20px; padding-right:20px; }
+    .title-input{ font-size:26px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+        <path d="M4 22C4 22 9 6 21 4C21 4 19.5 16 4 22Z" stroke="#82A183" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M4 22C8 18 13 12 19 6" stroke="#82A183" stroke-width="1.1" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-text">
+        <h1>Naskah</h1>
+        <p>ruang tulis</p>
+      </div>
+    </div>
+
+    <button class="new-btn" id="newBtn">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 2V13M2 7.5H13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Tulisan baru
+    </button>
+
+    <div class="note-list" id="noteList"></div>
+  </aside>
+
+  <main class="paper">
+    <div id="editorWrap" style="display:none; flex:1; flex-direction:column; min-height:0;">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="icon-btn menu-toggle" id="menuToggle">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2.5 5H15.5M2.5 9H15.5M2.5 13H15.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </button>
+          <span class="save-dot idle" id="saveDot"></span>
+          <span id="saveLabel">tersimpan</span>
+        </div>
+        <button class="icon-btn" id="deleteBtn" title="Hapus tulisan">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M3.5 4.5H13.5M6.5 4.5V3C6.5 2.5 7 2 7.5 2H9.5C10 2 10.5 2.5 10.5 3V4.5M4.5 4.5V13.5C4.5 14 5 14.5 5.5 14.5H11.5C12 14.5 12.5 14 12.5 13.5V4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <div class="editor">
+        <input class="title-input" id="titleInput" placeholder="Judul tulisan..." maxlength="120">
+        <textarea class="body-input" id="bodyInput" placeholder="Mulai menulis di sini..."></textarea>
+      </div>
+
+      <div class="statusbar">
+        <span id="wordCount">0 kata</span>
+        <span id="lastEdit"></span>
+      </div>
+    </div>
+
+    <div class="welcome" id="welcome">
+      <svg width="46" height="46" viewBox="0 0 26 26" fill="none">
+        <path d="M4 22C4 22 9 6 21 4C21 4 19.5 16 4 22Z" stroke="#6B6A5C" stroke-width="1.2" stroke-linejoin="round"/>
+        <path d="M4 22C8 18 13 12 19 6" stroke="#6B6A5C" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+      <h2>Belum ada yang dibuka</h2>
+      <p>Pilih tulisan dari daftar di kiri, atau mulai satu yang baru.</p>
+      <button id="welcomeNewBtn">Tulisan baru</button>
+    </div>
+  </main>
+
+</div>
+
+<script>
+  // TEMPEL URL DEPLOYMENT GOOGLE APPS SCRIPT LO DI SINI (diakhiri /exec)
+  const API_URL = "PASTE_URL_DEPLOYMENT_GAS_DI_SINI";
+  // TEMPEL KODE RAHASIA YANG SAMA PERSIS DENGAN SECRET_TOKEN DI Code.gs
+  const API_TOKEN = "GANTI_DENGAN_KODE_RAHASIA_LO";
+</script>
+<script>
+(function(){
+  const noteList = document.getElementById('noteList');
+  const editorWrap = document.getElementById('editorWrap');
+  const welcome = document.getElementById('welcome');
+  const titleInput = document.getElementById('titleInput');
+  const bodyInput = document.getElementById('bodyInput');
+  const wordCount = document.getElementById('wordCount');
+  const lastEdit = document.getElementById('lastEdit');
+  const saveDot = document.getElementById('saveDot');
+  const saveLabel = document.getElementById('saveLabel');
+  const sidebar = document.getElementById('sidebar');
+
+  let notes = [];
+  let activeId = null;
+  let saveTimer = null;
+
+  function uid(){
+    return 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  }
+
+  function fmtDate(ts){
+    const d = new Date(ts);
+    const now = new Date();
+    const sameDay = d.toDateString() === now.toDateString();
+    if(sameDay) return d.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+    return d.toLocaleDateString('id-ID', {day:'numeric', month:'short'});
+  }
+
+  async function loadAll(){
+    saveLabel.textContent = 'memuat...';
+    try{
+      const res = await fetch(API_URL + '?token=' + encodeURIComponent(API_TOKEN));
+      const data = await res.json();
+      if(!data.ok) throw new Error(data.error || 'gagal memuat');
+      notes = data.notes.sort((a,b) => b.updatedAt - a.updatedAt);
+    }catch(e){
+      notes = [];
+      noteList.innerHTML = '<div class="empty-state">Gagal terhubung ke backend.<br>Cek API_URL di kode, atau koneksi internet.</div>';
+      showWelcome();
+      return;
+    }
+    renderList();
+    if(notes.length){
+      openNote(notes[0].id);
+    } else {
+      showWelcome();
+    }
+  }
+
+  function renderList(){
+    noteList.innerHTML = '';
+    if(!notes.length){
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent = 'Belum ada tulisan. Mulai yang pertama.';
+      noteList.appendChild(empty);
+      return;
+    }
+    notes.forEach(n => {
+      const item = document.createElement('div');
+      item.className = 'note-item' + (n.id === activeId ? ' active' : '') + (!n.title && !n.content ? ' empty' : '');
+      const snippet = (n.content || '').replace(/\s+/g,' ').trim().slice(0, 40);
+      item.innerHTML = `
+        <p class="note-item-title">${escapeHtml(n.title || 'Tanpa judul')}</p>
+        <div class="note-item-meta">
+          <span class="note-item-snippet">${escapeHtml(snippet || 'Belum ada isi')}</span>
+          <span>${fmtDate(n.updatedAt)}</span>
+        </div>`;
+      item.addEventListener('click', () => openNote(n.id));
+      noteList.appendChild(item);
+    });
+  }
+
+  function escapeHtml(s){
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function showWelcome(){
+    activeId = null;
+    editorWrap.style.display = 'none';
+    welcome.style.display = 'flex';
+    renderList();
+  }
+
+  function showEditor(){
+    welcome.style.display = 'none';
+    editorWrap.style.display = 'flex';
+  }
+
+  function openNote(id){
+    const n = notes.find(x => x.id === id);
+    if(!n) return;
+    activeId = id;
+    showEditor();
+    titleInput.value = n.title || '';
+    bodyInput.value = n.content || '';
+    updateWordCount();
+    lastEdit.textContent = 'diubah ' + fmtDate(n.updatedAt);
+    renderList();
+    sidebar.classList.remove('open');
+    bodyInput.focus();
+  }
+
+  function updateWordCount(){
+    const text = bodyInput.value.trim();
+    const count = text ? text.split(/\s+/).length : 0;
+    wordCount.textContent = count + (count === 1 ? ' kata' : ' kata');
+  }
+
+  async function createNote(){
+    const id = uid();
+    const now = Date.now();
+    const note = { title: '', content: '', updatedAt: now };
+    notes.unshift({...note, id});
+    activeId = id;
+    try{
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'save', id, title: '', content: '', token: API_TOKEN })
+      });
+    }catch(e){}
+    showEditor();
+    titleInput.value = '';
+    bodyInput.value = '';
+    updateWordCount();
+    lastEdit.textContent = 'baru saja';
+    renderList();
+    sidebar.classList.remove('open');
+    titleInput.focus();
+  }
+
+  function scheduleSave(){
+    saveDot.classList.remove('idle');
+    saveLabel.textContent = 'menyimpan...';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(doSave, 700);
+  }
+
+  async function doSave(){
+    if(!activeId) return;
+    const id = activeId;
+    const title = titleInput.value;
+    const content = bodyInput.value;
+    try{
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'save', id, title, content, token: API_TOKEN })
+      });
+      const data = await res.json();
+      if(!data.ok) throw new Error(data.error || 'gagal');
+      const idx = notes.findIndex(n => n.id === id);
+      if(idx > -1){
+        notes[idx] = { id, title, content, updatedAt: data.updatedAt };
+        notes.sort((a,b) => b.updatedAt - a.updatedAt);
+      }
+      saveDot.classList.add('idle');
+      saveLabel.textContent = 'tersimpan';
+      lastEdit.textContent = 'diubah ' + fmtDate(data.updatedAt);
+    }catch(e){
+      saveLabel.textContent = 'gagal menyimpan';
+    }
+    renderList();
+  }
+
+  async function deleteNote(){
+    if(!activeId) return;
+    const n = notes.find(x => x.id === activeId);
+    const label = (n && n.title) ? n.title : 'tulisan ini';
+    if(!confirm('Hapus "' + label + '"? Tindakan ini tidak bisa dibatalkan.')) return;
+    try{
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'delete', id: activeId, token: API_TOKEN })
+      });
+    }catch(e){}
+    notes = notes.filter(x => x.id !== activeId);
+    if(notes.length){
+      openNote(notes[0].id);
+    } else {
+      showWelcome();
+    }
+  }
+
+  titleInput.addEventListener('input', scheduleSave);
+  bodyInput.addEventListener('input', () => { updateWordCount(); scheduleSave(); });
+  document.getElementById('newBtn').addEventListener('click', createNote);
+  document.getElementById('welcomeNewBtn').addEventListener('click', createNote);
+  document.getElementById('deleteBtn').addEventListener('click', deleteNote);
+  document.getElementById('menuToggle').addEventListener('click', () => sidebar.classList.toggle('open'));
+
+  loadAll();
+})();
+</script>
+</body>
+</html>
