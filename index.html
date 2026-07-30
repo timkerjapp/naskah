@@ -190,6 +190,34 @@
   .icon-btn:hover{ background:var(--paper-line); color:var(--rust); }
   .menu-toggle{ display:none; }
 
+  .download-wrap{ position:relative; }
+  .download-menu{
+    display:none;
+    position:absolute;
+    top:calc(100% + 6px);
+    right:0;
+    background:var(--paper);
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.15);
+    min-width:150px;
+    z-index:10;
+    overflow:hidden;
+  }
+  .download-menu.open{ display:block; }
+  .download-menu button{
+    width:100%;
+    text-align:left;
+    padding:10px 14px;
+    background:transparent;
+    border:none;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .download-menu button:hover{ background:var(--paper-dim); }
+
   .editor{
     flex:1;
     overflow-y:auto;
@@ -322,6 +350,15 @@
           <span class="save-dot idle" id="saveDot"></span>
           <span id="saveLabel">tersimpan</span>
         </div>
+        <div class="download-wrap">
+          <button class="icon-btn" id="downloadBtn" title="Unduh tulisan">
+            <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M8.5 2V11M8.5 11L5 7.5M8.5 11L12 7.5M3 13.5H14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="download-menu" id="downloadMenu">
+            <button id="downloadDocx">Unduh sebagai .docx</button>
+            <button id="downloadTxt">Unduh sebagai .txt</button>
+          </div>
+        </div>
         <button class="icon-btn" id="deleteBtn" title="Hapus tulisan">
           <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M3.5 4.5H13.5M6.5 4.5V3C6.5 2.5 7 2 7.5 2H9.5C10 2 10.5 2.5 10.5 3V4.5M4.5 4.5V13.5C4.5 14 5 14.5 5.5 14.5H11.5C12 14.5 12.5 14 12.5 13.5V4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         </button>
@@ -351,11 +388,12 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
   // TEMPEL URL DEPLOYMENT GOOGLE APPS SCRIPT LO DI SINI (diakhiri /exec)
-  const API_URL = "https://script.google.com/macros/s/AKfycbzzAwc17PQEORpJGjlM7ouD5BXvKwLM9g6-k8zdSLM802P1pE38YJi3ZtZfEWz1OKTY/exec";
+  const API_URL = "PASTE_URL_DEPLOYMENT_GAS_DI_SINI";
   // TEMPEL KODE RAHASIA YANG SAMA PERSIS DENGAN SECRET_TOKEN DI Code.gs
-  const API_TOKEN = "naskah-rby-8271xyz";
+  const API_TOKEN = "GANTI_DENGAN_KODE_RAHASIA_LO";
 </script>
 <script>
 (function(){
@@ -546,11 +584,104 @@
     }
   }
 
+  function safeFileName(name){
+    return (name || 'tanpa-judul').trim().replace(/[\\/:*?"<>|]+/g, '-').slice(0, 80) || 'tanpa-judul';
+  }
+
+  function triggerDownload(blob, filename){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function downloadTxt(){
+    const title = titleInput.value || 'Tanpa judul';
+    const content = bodyInput.value || '';
+    const text = title + '\n\n' + content;
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    triggerDownload(blob, safeFileName(title) + '.txt');
+  }
+
+  function escapeXml(s){
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  }
+
+  async function downloadDocx(){
+    const title = titleInput.value || 'Tanpa judul';
+    const content = bodyInput.value || '';
+    const lines = content.split('\n');
+
+    const bodyParagraphs = lines.map(line => {
+      if(!line.trim()){
+        return '<w:p/>';
+      }
+      return '<w:p><w:r><w:t xml:space="preserve">' + escapeXml(line) + '</w:t></w:r></w:p>';
+    }).join('');
+
+    const titlePara = '<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:after="360"/></w:pPr>' +
+      '<w:r><w:rPr><w:b/><w:sz w:val="32"/></w:rPr><w:t xml:space="preserve">' + escapeXml(title) + '</w:t></w:r></w:p>';
+
+    const documentXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+      '<w:body>' + titlePara + bodyParagraphs +
+      '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1417" w:right="1417" w:bottom="1417" w:left="1417"/></w:sectPr>' +
+      '</w:body></w:document>';
+
+    const contentTypesXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+      '<Default Extension="xml" ContentType="application/xml"/>' +
+      '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+      '</Types>';
+
+    const relsXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+      '</Relationships>';
+
+    const zip = new JSZip();
+    zip.file('[Content_Types].xml', contentTypesXml);
+    zip.folder('_rels').file('.rels', relsXml);
+    zip.folder('word').file('document.xml', documentXml);
+
+    try{
+      const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      triggerDownload(blob, safeFileName(title) + '.docx');
+    }catch(e){
+      alert('Gagal membuat file docx: ' + e.message);
+    }
+  }
+
   titleInput.addEventListener('input', scheduleSave);
   bodyInput.addEventListener('input', () => { updateWordCount(); scheduleSave(); });
   document.getElementById('newBtn').addEventListener('click', createNote);
   document.getElementById('welcomeNewBtn').addEventListener('click', createNote);
   document.getElementById('deleteBtn').addEventListener('click', deleteNote);
+  document.getElementById('downloadBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('downloadMenu').classList.toggle('open');
+  });
+  document.getElementById('downloadDocx').addEventListener('click', () => {
+    document.getElementById('downloadMenu').classList.remove('open');
+    downloadDocx();
+  });
+  document.getElementById('downloadTxt').addEventListener('click', () => {
+    document.getElementById('downloadMenu').classList.remove('open');
+    downloadTxt();
+  });
+  document.addEventListener('click', () => {
+    document.getElementById('downloadMenu').classList.remove('open');
+  });
   document.getElementById('menuToggle').addEventListener('click', () => sidebar.classList.toggle('open'));
 
   loadAll();
