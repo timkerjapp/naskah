@@ -146,6 +146,80 @@
     line-height:1.6;
   }
 
+
+  /* ===== MULTI-SELECT ===== */
+  .side-actions{ display:flex; gap:8px; margin:4px 18px 14px; }
+  .side-actions .new-btn{ margin:0; flex:1; }
+  .select-toggle{
+    padding:10px 14px;
+    background:transparent;
+    border:1px solid #454940;
+    color:var(--spine-text);
+    border-radius:8px;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    cursor:pointer;
+    transition:background 0.15s, border-color 0.15s;
+  }
+  .select-toggle:hover{ background:var(--spine-2); border-color:var(--accent); }
+  .select-toggle.on{ background:var(--accent); border-color:var(--accent); color:#fff; }
+
+  .note-item .check{
+    display:none;
+    width:16px; height:16px;
+    border:1.5px solid var(--spine-text-dim);
+    border-radius:4px;
+    flex-shrink:0;
+    margin-top:2px;
+    align-items:center;
+    justify-content:center;
+  }
+  .select-mode .note-item{ display:flex; gap:10px; align-items:flex-start; }
+  .select-mode .note-item .check{ display:flex; }
+  .select-mode .note-item .note-body{ min-width:0; flex:1; }
+  .note-item.selected{ background:var(--spine-2); }
+  .note-item.selected .check{ background:var(--accent-bright); border-color:var(--accent-bright); }
+  .note-item.selected .check::after{
+    content:'';
+    width:8px; height:4px;
+    border-left:2px solid var(--spine);
+    border-bottom:2px solid var(--spine);
+    transform:rotate(-45deg) translate(1px,-1px);
+  }
+
+  .select-bar{
+    display:none;
+    border-top:1px solid #3a3d34;
+    padding:12px 14px 16px;
+    background:var(--spine);
+    flex-direction:column;
+    gap:8px;
+  }
+  .select-mode .select-bar{ display:flex; }
+  .select-bar-top{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:12.5px; color:var(--spine-text-dim);
+  }
+  .select-bar-top button{
+    background:transparent; border:none; color:var(--accent-bright);
+    font-family:'Inter',sans-serif; font-size:12.5px; cursor:pointer; padding:0;
+  }
+  .select-bar-btns{ display:flex; flex-direction:column; gap:6px; }
+  .select-bar-btns button{
+    padding:9px 12px;
+    background:var(--spine-2);
+    border:1px solid #454940;
+    color:var(--spine-text);
+    border-radius:7px;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    cursor:pointer;
+    text-align:left;
+  }
+  .select-bar-btns button:hover:not(:disabled){ border-color:var(--accent-bright); }
+  .select-bar-btns button:disabled{ opacity:0.4; cursor:default; }
+
   /* ===== MAIN / PAPER ===== */
   .paper{
     flex:1;
@@ -299,6 +373,183 @@
     cursor:pointer;
   }
 
+  /* ===== CHAT PANEL ===== */
+  .chat-fab{
+    position:fixed;
+    bottom:26px;
+    right:26px;
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 6px 18px rgba(0,0,0,0.25);
+    z-index:15;
+    transition:transform 0.15s;
+  }
+  .chat-fab:hover{ transform:scale(1.06); }
+
+  .chat-panel{
+    position:fixed;
+    top:0; right:0; bottom:0;
+    width:360px;
+    background:var(--paper-dim);
+    border-left:1px solid var(--paper-line);
+    box-shadow:-10px 0 30px rgba(0,0,0,0.18);
+    display:flex;
+    flex-direction:column;
+    transform:translateX(100%);
+    transition:transform 0.22s ease;
+    z-index:25;
+  }
+  .chat-panel.open{ transform:translateX(0); }
+
+  .chat-header{
+    padding:16px 18px 12px;
+    border-bottom:1px solid var(--paper-line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .chat-header h3{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:18px;
+    margin:0;
+    color:var(--ink);
+  }
+  .chat-close{
+    background:transparent;
+    border:none;
+    color:var(--ink-soft);
+    cursor:pointer;
+    padding:4px;
+  }
+
+  .provider-toggle{
+    display:flex;
+    gap:6px;
+    padding:12px 18px 0;
+  }
+  .provider-btn{
+    flex:1;
+    padding:7px 0;
+    text-align:center;
+    border:1px solid var(--paper-line);
+    background:var(--paper);
+    border-radius:7px;
+    font-family:'Inter',sans-serif;
+    font-size:12.5px;
+    font-weight:500;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .provider-btn.active{
+    background:var(--ink);
+    color:var(--paper);
+    border-color:var(--ink);
+  }
+
+  .chat-messages{
+    flex:1;
+    overflow-y:auto;
+    padding:16px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .chat-messages::-webkit-scrollbar{ width:7px; }
+  .chat-messages::-webkit-scrollbar-thumb{ background:var(--paper-line); border-radius:4px; }
+
+  .chat-empty{
+    color:var(--ink-soft);
+    font-size:13px;
+    text-align:center;
+    margin-top:30px;
+    line-height:1.6;
+  }
+
+  .msg{
+    max-width:88%;
+    padding:9px 12px;
+    border-radius:10px;
+    font-size:13.5px;
+    line-height:1.55;
+    white-space:pre-wrap;
+    word-break:break-word;
+  }
+  .msg.user{
+    align-self:flex-end;
+    background:var(--ink);
+    color:var(--paper);
+    border-bottom-right-radius:3px;
+  }
+  .msg.assistant{
+    align-self:flex-start;
+    background:var(--paper);
+    border:1px solid var(--paper-line);
+    color:var(--ink);
+    border-bottom-left-radius:3px;
+  }
+  .msg.error{
+    align-self:flex-start;
+    background:#F4E1D8;
+    color:var(--rust);
+    border:1px solid var(--rust-soft);
+    font-size:12.5px;
+  }
+  .msg.thinking{
+    align-self:flex-start;
+    color:var(--ink-soft);
+    font-style:italic;
+    font-size:12.5px;
+  }
+
+  .chat-input-row{
+    padding:12px 18px 16px;
+    border-top:1px solid var(--paper-line);
+    display:flex;
+    gap:8px;
+    align-items:flex-end;
+  }
+  .chat-input-row textarea{
+    flex:1;
+    resize:none;
+    max-height:100px;
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    padding:8px 10px;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    background:var(--paper);
+    color:var(--ink);
+    outline:none;
+  }
+  .chat-send{
+    width:36px;
+    height:36px;
+    border-radius:8px;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  .chat-send:disabled{ opacity:0.4; cursor:default; }
+
+  @media (max-width: 760px){
+    .chat-panel{ width:100%; }
+  }
+
   @media (max-width: 760px){
     .sidebar{
       position:fixed;
@@ -332,12 +583,27 @@
       </div>
     </div>
 
-    <button class="new-btn" id="newBtn">
-      <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 2V13M2 7.5H13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-      Tulisan baru
-    </button>
+    <div class="side-actions">
+      <button class="new-btn" id="newBtn">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 2V13M2 7.5H13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Tulisan baru
+      </button>
+      <button class="select-toggle" id="selectToggle" title="Pilih beberapa tulisan">Pilih</button>
+    </div>
 
     <div class="note-list" id="noteList"></div>
+
+    <div class="select-bar" id="selectBar">
+      <div class="select-bar-top">
+        <span id="selectCount">0 dipilih</span>
+        <button id="selectAllBtn">Pilih semua</button>
+      </div>
+      <div class="select-bar-btns">
+        <button id="batchDocx" disabled>Gabung jadi 1 file .docx</button>
+        <button id="batchTxt" disabled>Gabung jadi 1 file .txt</button>
+        <button id="batchZip" disabled>Terpisah (ZIP berisi .docx)</button>
+      </div>
+    </div>
   </aside>
 
   <main class="paper">
@@ -386,6 +652,35 @@
     </div>
   </main>
 
+  <button class="chat-fab" id="chatFab" title="Chat brainstorming">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 11C3 6.6 6.8 3 11.5 3C16.2 3 20 6.6 20 11C20 15.4 16.2 19 11.5 19C10.2 19 9 18.7 7.9 18.2L3 19.5L4.3 15.2C3.5 14 3 12.6 3 11Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+  </button>
+
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-header">
+      <div>
+        <h3>Brainstorming</h3>
+        <p id="chatContextLabel" style="margin:2px 0 0; font-size:11px; color:var(--ink-soft);"></p>
+      </div>
+      <button class="chat-close" id="chatClose">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4L14 14M14 4L4 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="provider-toggle">
+      <button class="provider-btn active" id="provGrok" data-provider="grok">Grok</button>
+      <button class="provider-btn" id="provOpenai" data-provider="openai">ChatGPT</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-empty" id="chatEmpty">Lempar ide, tanya pendapat, atau minta bantuin mikirin plot/judul di sini.</div>
+    </div>
+    <div class="chat-input-row">
+      <textarea id="chatInput" rows="1" placeholder="Tulis pesan..."></textarea>
+      <button class="chat-send" id="chatSend">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8H14M14 8L9 3M14 8L9 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -424,26 +719,81 @@
     return d.toLocaleDateString('id-ID', {day:'numeric', month:'short'});
   }
 
+  const CACHE_KEY = 'naskah_notes_cache_v1';
+
+  function loadCache(){
+    try{ return JSON.parse(localStorage.getItem(CACHE_KEY) || '[]'); }
+    catch(e){ return []; }
+  }
+  function saveCache(list){
+    try{ localStorage.setItem(CACHE_KEY, JSON.stringify(list)); }
+    catch(e){ /* localStorage penuh/nggak tersedia, abaikan */ }
+  }
+
+  function renderLoadingSkeleton(){
+    noteList.innerHTML = '';
+    for(let i=0;i<4;i++){
+      const sk = document.createElement('div');
+      sk.className = 'note-item';
+      sk.style.opacity = '0.35';
+      sk.innerHTML = '<p class="note-item-title">Memuat...</p><div class="note-item-meta"><span class="note-item-snippet">&nbsp;</span></div>';
+      noteList.appendChild(sk);
+    }
+  }
+
   async function loadAll(){
-    saveLabel.textContent = 'memuat...';
+    const cached = loadCache();
+
+    if(cached.length){
+      // Tampilkan cache dulu biar instan, sambil sinkron ke server di background
+      notes = cached.sort((a,b) => b.updatedAt - a.updatedAt);
+      renderList();
+      openNote(notes[0].id);
+      saveLabel.textContent = 'menyinkronkan...';
+    } else {
+      renderLoadingSkeleton();
+    }
+
     try{
       const res = await fetch(API_URL + '?token=' + encodeURIComponent(API_TOKEN));
       const data = await res.json();
       if(!data.ok) throw new Error(data.error || 'gagal memuat');
-      notes = data.notes.sort((a,b) => b.updatedAt - a.updatedAt);
+
+      const fresh = data.notes.sort((a,b) => b.updatedAt - a.updatedAt);
+      notes = fresh;
+      saveCache(fresh);
+
+      if(activeId && !fresh.find(n => n.id === activeId)){
+        activeId = null; // note aktif ternyata udah kehapus di server
+      }
+      renderList();
+      if(activeId){
+        // refresh isi editor kalau ada perubahan dari server (misal diedit device lain)
+        const n = fresh.find(x => x.id === activeId);
+        if(n && document.activeElement !== titleInput && document.activeElement !== bodyInput){
+          titleInput.value = n.title || '';
+          bodyInput.value = n.content || '';
+          updateWordCount();
+        }
+        saveLabel.textContent = 'tersimpan';
+      } else if(fresh.length){
+        openNote(fresh[0].id);
+      } else {
+        showWelcome();
+      }
     }catch(e){
-      notes = [];
-      noteList.innerHTML = '<div class="empty-state">Gagal terhubung ke backend.<br>Cek API_URL di kode, atau koneksi internet.</div>';
-      showWelcome();
-      return;
-    }
-    renderList();
-    if(notes.length){
-      openNote(notes[0].id);
-    } else {
-      showWelcome();
+      if(!cached.length){
+        notes = [];
+        noteList.innerHTML = '<div class="empty-state">Gagal terhubung ke backend.<br>Cek API_URL di kode, atau koneksi internet.</div>';
+        showWelcome();
+      } else {
+        saveLabel.textContent = 'offline (pakai data tersimpan)';
+      }
     }
   }
+
+  let selectMode = false;
+  const selectedIds = new Set();
 
   function renderList(){
     noteList.innerHTML = '';
@@ -452,21 +802,58 @@
       empty.className = 'empty-state';
       empty.textContent = 'Belum ada tulisan. Mulai yang pertama.';
       noteList.appendChild(empty);
+      updateSelectBar();
       return;
     }
     notes.forEach(n => {
       const item = document.createElement('div');
-      item.className = 'note-item' + (n.id === activeId ? ' active' : '') + (!n.title && !n.content ? ' empty' : '');
+      const isSel = selectedIds.has(n.id);
+      item.className = 'note-item'
+        + (!selectMode && n.id === activeId ? ' active' : '')
+        + (!n.title && !n.content ? ' empty' : '')
+        + (isSel ? ' selected' : '');
       const snippet = (n.content || '').replace(/\s+/g,' ').trim().slice(0, 40);
       item.innerHTML = `
-        <p class="note-item-title">${escapeHtml(n.title || 'Tanpa judul')}</p>
-        <div class="note-item-meta">
-          <span class="note-item-snippet">${escapeHtml(snippet || 'Belum ada isi')}</span>
-          <span>${fmtDate(n.updatedAt)}</span>
+        <span class="check"></span>
+        <div class="note-body">
+          <p class="note-item-title">${escapeHtml(n.title || 'Tanpa judul')}</p>
+          <div class="note-item-meta">
+            <span class="note-item-snippet">${escapeHtml(snippet || 'Belum ada isi')}</span>
+            <span>${fmtDate(n.updatedAt)}</span>
+          </div>
         </div>`;
-      item.addEventListener('click', () => openNote(n.id));
+      item.addEventListener('click', () => {
+        if(selectMode){
+          if(selectedIds.has(n.id)) selectedIds.delete(n.id); else selectedIds.add(n.id);
+          renderList();
+        } else {
+          openNote(n.id);
+        }
+      });
       noteList.appendChild(item);
     });
+    updateSelectBar();
+  }
+
+  function updateSelectBar(){
+    const c = selectedIds.size;
+    const el = document.getElementById('selectCount');
+    if(!el) return;
+    el.textContent = c + ' dipilih';
+    ['batchDocx','batchTxt','batchZip'].forEach(id => {
+      document.getElementById(id).disabled = c === 0;
+    });
+    document.getElementById('selectAllBtn').textContent =
+      (notes.length && c === notes.length) ? 'Batal pilih semua' : 'Pilih semua';
+  }
+
+  function setSelectMode(on){
+    selectMode = on;
+    if(!on) selectedIds.clear();
+    sidebar.classList.toggle('select-mode', on);
+    document.getElementById('selectToggle').classList.toggle('on', on);
+    document.getElementById('selectToggle').textContent = on ? 'Selesai' : 'Pilih';
+    renderList();
   }
 
   function escapeHtml(s){
@@ -520,6 +907,7 @@
         body: JSON.stringify({ action: 'save', id, title: '', content: '', token: API_TOKEN })
       });
     }catch(e){}
+    saveCache(notes);
     showEditor();
     titleInput.value = '';
     bodyInput.value = '';
@@ -558,6 +946,7 @@
       saveDot.classList.add('idle');
       saveLabel.textContent = 'tersimpan';
       lastEdit.textContent = 'diubah ' + fmtDate(data.updatedAt);
+      saveCache(notes);
     }catch(e){
       saveLabel.textContent = 'gagal menyimpan';
     }
@@ -577,6 +966,7 @@
       });
     }catch(e){}
     notes = notes.filter(x => x.id !== activeId);
+    saveCache(notes);
     if(notes.length){
       openNote(notes[0].id);
     } else {
@@ -616,24 +1006,23 @@
       .replace(/'/g, '&apos;');
   }
 
-  async function downloadDocx(){
-    const title = titleInput.value || 'Tanpa judul';
-    const content = bodyInput.value || '';
-    const lines = content.split('\n');
-
-    const bodyParagraphs = lines.map(line => {
-      if(!line.trim()){
-        return '<w:p/>';
-      }
-      return '<w:p><w:r><w:t xml:space="preserve">' + escapeXml(line) + '</w:t></w:r></w:p>';
+  // items: [{title, content}] -> Blob .docx (tiap naskah dipisah page break)
+  async function buildDocxBlob(items){
+    const body = items.map((it, idx) => {
+      const title = it.title || 'Tanpa judul';
+      const pageBreak = idx > 0 ? '<w:p><w:r><w:br w:type="page"/></w:r></w:p>' : '';
+      const titlePara = '<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:after="360"/></w:pPr>' +
+        '<w:r><w:rPr><w:b/><w:sz w:val="32"/></w:rPr><w:t xml:space="preserve">' + escapeXml(title) + '</w:t></w:r></w:p>';
+      const paras = (it.content || '').split('\n').map(line => {
+        if(!line.trim()) return '<w:p/>';
+        return '<w:p><w:r><w:t xml:space="preserve">' + escapeXml(line) + '</w:t></w:r></w:p>';
+      }).join('');
+      return pageBreak + titlePara + paras;
     }).join('');
-
-    const titlePara = '<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:after="360"/></w:pPr>' +
-      '<w:r><w:rPr><w:b/><w:sz w:val="32"/></w:rPr><w:t xml:space="preserve">' + escapeXml(title) + '</w:t></w:r></w:p>';
 
     const documentXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
       '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
-      '<w:body>' + titlePara + bodyParagraphs +
+      '<w:body>' + body +
       '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1417" w:right="1417" w:bottom="1417" w:left="1417"/></w:sectPr>' +
       '</w:body></w:document>';
 
@@ -653,20 +1042,187 @@
     zip.file('[Content_Types].xml', contentTypesXml);
     zip.folder('_rels').file('.rels', relsXml);
     zip.folder('word').file('document.xml', documentXml);
+    return zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  }
 
+  async function downloadDocx(){
+    const title = titleInput.value || 'Tanpa judul';
     try{
-      const blob = await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      const blob = await buildDocxBlob([{ title, content: bodyInput.value || '' }]);
       triggerDownload(blob, safeFileName(title) + '.docx');
     }catch(e){
       alert('Gagal membuat file docx: ' + e.message);
     }
   }
 
+  // ===== DOWNLOAD BANYAK NASKAH =====
+  function getSelectedItems(){
+    // urut sesuai tampilan sidebar; naskah yang lagi dibuka pakai isi editor terbaru
+    return notes.filter(n => selectedIds.has(n.id)).map(n => {
+      if(n.id === activeId){
+        return { title: titleInput.value, content: bodyInput.value };
+      }
+      return { title: n.title, content: n.content };
+    });
+  }
+
+  function dateStamp(){
+    const d = new Date();
+    const p = x => String(x).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate());
+  }
+
+  async function batchDownload(kind){
+    const items = getSelectedItems();
+    if(!items.length) return;
+    const stamp = dateStamp();
+    try{
+      if(kind === 'txt'){
+        const text = items.map(it => (it.title || 'Tanpa judul') + '\n\n' + (it.content || ''))
+          .join('\n\n' + '='.repeat(30) + '\n\n');
+        triggerDownload(new Blob([text], { type: 'text/plain;charset=utf-8' }), 'naskah-' + items.length + 'tulisan-' + stamp + '.txt');
+      } else if(kind === 'docx'){
+        const blob = await buildDocxBlob(items);
+        triggerDownload(blob, 'naskah-' + items.length + 'tulisan-' + stamp + '.docx');
+      } else if(kind === 'zip'){
+        const zip = new JSZip();
+        const used = {};
+        for(const it of items){
+          let base = safeFileName(it.title || 'Tanpa judul');
+          used[base] = (used[base] || 0) + 1;
+          const name = used[base] > 1 ? base + ' (' + used[base] + ')' : base;
+          const blob = await buildDocxBlob([it]);
+          zip.file(name + '.docx', blob);
+        }
+        const out = await zip.generateAsync({ type: 'blob' });
+        triggerDownload(out, 'naskah-' + items.length + 'tulisan-' + stamp + '.zip');
+      }
+    }catch(e){
+      alert('Gagal mengunduh: ' + e.message);
+    }
+  }
+
+  // ===== CHAT BRAINSTORMING =====
+  const chatFab = document.getElementById('chatFab');
+  const chatPanel = document.getElementById('chatPanel');
+  const chatClose = document.getElementById('chatClose');
+  const chatMessages = document.getElementById('chatMessages');
+  const chatEmpty = document.getElementById('chatEmpty');
+  const chatInput = document.getElementById('chatInput');
+  const chatSend = document.getElementById('chatSend');
+  const provGrok = document.getElementById('provGrok');
+  const provOpenai = document.getElementById('provOpenai');
+
+  let chatProvider = 'grok';
+  let chatHistory = []; // {role, content} — sesi ini doang, nggak disimpan permanen
+
+  function toggleChat(open){
+    chatPanel.classList.toggle('open', open);
+    if(open){
+      const t = titleInput.value.trim();
+      document.getElementById('chatContextLabel').textContent = t
+        ? 'Baca konteks: "' + t + '"'
+        : 'Belum ada draft terbuka';
+    }
+  }
+  chatFab.addEventListener('click', () => toggleChat(true));
+  chatClose.addEventListener('click', () => toggleChat(false));
+
+  function setProvider(p){
+    chatProvider = p;
+    provGrok.classList.toggle('active', p === 'grok');
+    provOpenai.classList.toggle('active', p === 'openai');
+  }
+  provGrok.addEventListener('click', () => setProvider('grok'));
+  provOpenai.addEventListener('click', () => setProvider('openai'));
+
+  function renderChatMsg(role, text){
+    if(chatEmpty) chatEmpty.style.display = 'none';
+    const div = document.createElement('div');
+    div.className = 'msg ' + role;
+    div.textContent = text;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return div;
+  }
+
+  async function sendChat(){
+    const text = chatInput.value.trim();
+    if(!text) return;
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    renderChatMsg('user', text);
+    chatHistory.push({ role: 'user', content: text });
+
+    const thinking = renderChatMsg('thinking', 'mikir...');
+    chatSend.disabled = true;
+
+    try{
+      const storyTitle = titleInput.value.trim();
+      const storyContent = bodyInput.value.trim();
+      const MAX_CONTEXT_CHARS = 6000; // biar hemat token, ambil bagian akhir (paling relevan buat nyambung)
+      const trimmedStory = storyContent.length > MAX_CONTEXT_CHARS
+        ? '...(bagian awal dipotong)...\n' + storyContent.slice(-MAX_CONTEXT_CHARS)
+        : storyContent;
+
+      const systemPrompt = 'Kamu partner brainstorming santai buat penulis cerita bersambung. ' +
+        'Jawab singkat, membumi, pakai Bahasa Indonesia kasual, dan lempar ide konkret bukan cuma teori. ' +
+        'Jaga saran lo supaya konsisten sama karakter, plot, dan gaya bahasa yang udah ada di draft berikut ini.\n\n' +
+        (storyTitle ? 'Judul cerita: ' + storyTitle + '\n' : '') +
+        (trimmedStory ? 'Draft yang lagi ditulis (bisa jadi belum lengkap):\n"""\n' + trimmedStory + '\n"""' : '(belum ada isi draft)');
+
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'chat',
+          provider: chatProvider,
+          token: API_TOKEN,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            ...chatHistory.slice(-16)
+          ]
+        })
+      });
+      const data = await res.json();
+      thinking.remove();
+      if(!data.ok) throw new Error(data.error || 'gagal');
+      renderChatMsg('assistant', data.reply);
+      chatHistory.push({ role: 'assistant', content: data.reply });
+    }catch(e){
+      thinking.remove();
+      renderChatMsg('error', 'Gagal dapat balasan: ' + e.message);
+    }finally{
+      chatSend.disabled = false;
+    }
+  }
+
+  chatSend.addEventListener('click', sendChat);
+  chatInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      sendChat();
+    }
+  });
+  chatInput.addEventListener('input', () => {
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
+  });
+
   titleInput.addEventListener('input', scheduleSave);
   bodyInput.addEventListener('input', () => { updateWordCount(); scheduleSave(); });
   document.getElementById('newBtn').addEventListener('click', createNote);
   document.getElementById('welcomeNewBtn').addEventListener('click', createNote);
   document.getElementById('deleteBtn').addEventListener('click', deleteNote);
+  document.getElementById('selectToggle').addEventListener('click', () => setSelectMode(!selectMode));
+  document.getElementById('selectAllBtn').addEventListener('click', () => {
+    if(selectedIds.size === notes.length) selectedIds.clear();
+    else notes.forEach(n => selectedIds.add(n.id));
+    renderList();
+  });
+  document.getElementById('batchDocx').addEventListener('click', () => batchDownload('docx'));
+  document.getElementById('batchTxt').addEventListener('click', () => batchDownload('txt'));
+  document.getElementById('batchZip').addEventListener('click', () => batchDownload('zip'));
   document.getElementById('downloadBtn').addEventListener('click', (e) => {
     e.stopPropagation();
     document.getElementById('downloadMenu').classList.toggle('open');
@@ -688,4 +1244,4 @@
 })();
 </script>
 </body>
-</html>
+</html>fAPI
