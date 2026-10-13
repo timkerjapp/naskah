@@ -167,7 +167,7 @@
 
   .note-item .check{
     display:none;
-    width:16px; height:16px;
+    min-width:18px; width:18px; height:18px;
     border:1.5px solid var(--spine-text-dim);
     border-radius:4px;
     flex-shrink:0;
@@ -179,13 +179,13 @@
   .select-mode .note-item .check{ display:flex; }
   .select-mode .note-item .note-body{ min-width:0; flex:1; }
   .note-item.selected{ background:var(--spine-2); }
-  .note-item.selected .check{ background:var(--accent-bright); border-color:var(--accent-bright); }
-  .note-item.selected .check::after{
-    content:'';
-    width:8px; height:4px;
-    border-left:2px solid var(--spine);
-    border-bottom:2px solid var(--spine);
-    transform:rotate(-45deg) translate(1px,-1px);
+  .note-item.selected .check{
+    background:var(--accent-bright);
+    border-color:var(--accent-bright);
+    color:var(--spine);
+    font-size:10px;
+    font-weight:700;
+    line-height:1;
   }
 
   .select-bar{
@@ -814,7 +814,7 @@
         + (isSel ? ' selected' : '');
       const snippet = (n.content || '').replace(/\s+/g,' ').trim().slice(0, 40);
       item.innerHTML = `
-        <span class="check"></span>
+        <span class="check">${isSel ? ([...selectedIds].indexOf(n.id) + 1) : ''}</span>
         <div class="note-body">
           <p class="note-item-title">${escapeHtml(n.title || 'Tanpa judul')}</p>
           <div class="note-item-meta">
@@ -1057,13 +1057,17 @@
 
   // ===== DOWNLOAD BANYAK NASKAH =====
   function getSelectedItems(){
-    // urut sesuai tampilan sidebar; naskah yang lagi dibuka pakai isi editor terbaru
-    return notes.filter(n => selectedIds.has(n.id)).map(n => {
-      if(n.id === activeId){
-        return { title: titleInput.value, content: bodyInput.value };
-      }
-      return { title: n.title, content: n.content };
-    });
+    // urutan sesuai urutan klik (Set menyimpan urutan penambahan);
+    // naskah yang lagi dibuka pakai isi editor terbaru
+    return [...selectedIds]
+      .map(id => notes.find(n => n.id === id))
+      .filter(Boolean)
+      .map(n => {
+        if(n.id === activeId){
+          return { title: titleInput.value, content: bodyInput.value };
+        }
+        return { title: n.title, content: n.content };
+      });
   }
 
   function dateStamp(){
@@ -1244,4 +1248,4 @@
 })();
 </script>
 </body>
-</html>fAPI
+</html>
